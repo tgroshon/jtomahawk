@@ -98,6 +98,17 @@ public class Scanner {
                 }
                 break;
 
+            // whitespace, ignore
+            case ' ':
+            case '\r':
+            case '\t':
+                break;
+
+            // newline, advance line counter
+            case '\n':
+                line++;
+                break;
+
             // error catcher
             default:
                 App.error(line, "Unexpected character: " + c);
