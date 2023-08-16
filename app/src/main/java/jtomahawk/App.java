@@ -39,7 +39,7 @@ public class App {
 
         System.out.println("Welcome to jTomahawk interactive prompt...");
         for (;;) {
-            System.out.println("> ");
+            System.out.print("> ");
             String line = reader.readLine();
             if (line == null) {
                 break; // triggered when end-of-file signal is given; i.e. ^d
