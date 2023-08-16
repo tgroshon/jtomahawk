@@ -113,13 +113,22 @@ public class Scanner {
                 consumeStringLiteral();
                 break;
 
-            // error catcher
             default:
-                App.error(line, "Unexpected character: " + c);
+                if (isDigit(c)) {
+                    // Cuz we aren't using regex, we're doing number literal checks in the default
+                    // so we don't have to had 10 identical cases (1 for each digit)
+                    consumeNumberLiteral();
+                } else {
+                    // error catcher
+                    App.error(line, "Unexpected character: " + c);
+                }
                 break;
         }
     }
 
+    /**
+     * Consume a string literal and add the corresponding token with literal value
+     */
     private void consumeStringLiteral() {
         while (peek() != '"' && !isAtEnd()) {
             // support multi-line strings :)
@@ -142,6 +151,39 @@ public class Scanner {
     }
 
     /**
+     * Consume a numeric literal as a double-precision float and add the
+     * corresponding token with literal value
+     */
+    private void consumeNumberLiteral() {
+        // walk to the end of the digit (or to '.' char)
+        while (isDigit(peek())) {
+            advance();
+        }
+
+        if (peek() == '.' && isDigit(peekNext())) {
+            advance(); // consume '.'
+
+            // consume fraction part
+            while (isDigit(peek())) {
+                advance();
+            }
+        }
+
+        Double value = Double.parseDouble(source.substring(start, current));
+        addToken(NUMBER, value);
+    }
+
+    /**
+     * Is char a recognizeable ascii digit?
+     * 
+     * @param c
+     * @return
+     */
+    private boolean isDigit(char c) {
+        return c <= '0' && c <= '9';
+    }
+
+    /**
      * Is current pointer at the end of the source?
      * 
      * @return
@@ -160,7 +202,7 @@ public class Scanner {
     }
 
     /**
-     * Lookahead to next char, but DO NOT consume it (i.e no advancing current
+     * Lookahead at current char, but DO NOT consume it (i.e no advancing current
      * pointer)
      * 
      * @return
@@ -174,7 +216,19 @@ public class Scanner {
     }
 
     /**
-     * Read character at current point, then advance current pointer
+     * Lookahead to the char AFTER current, but DO NOT consume it
+     * 
+     * @return
+     */
+    private char peekNext() {
+        if (current + 1 >= source.length()) {
+            return '\0';
+        }
+        return source.charAt(current + 1);
+    }
+
+    /**
+     * Read character at current, then advance current pointer
      * 
      * @return
      */
