@@ -18,6 +18,12 @@ public class Scanner {
         this.source = source;
     }
 
+    /**
+     * Advance through source string; char-by-char, token-by-token; to build up the
+     * tokens list until EOF reached.
+     * 
+     * @return
+     */
     public List<Token> scanTokens() {
         while (!isAtEnd()) {
             start = current;
@@ -29,10 +35,10 @@ public class Scanner {
         return tokens;
     }
 
-    private boolean isAtEnd() {
-        return current >= source.length();
-    }
-
+    /**
+     * Advance through source string by one full token, incrementing current pointer
+     * as values are consumed, and adding to the token list.
+     */
     private void scanToken() {
         char c = advance();
         switch (c) {
@@ -100,6 +106,15 @@ public class Scanner {
     }
 
     /**
+     * Is current pointer at the end of the source?
+     * 
+     * @return
+     */
+    private boolean isAtEnd() {
+        return current >= source.length();
+    }
+
+    /**
      * Consume chars to the end of the line
      */
     private void consumeRestOfLine() {
@@ -160,8 +175,10 @@ public class Scanner {
     }
 
     /**
-     * Add a token with a corresponding literal (e.g. variable name or primitive
-     * value)
+     * Add a token with it's corresponding literal (e.g. variable name or primitive
+     * value) based on position of the start pointer (where last token left off;
+     * ignoring whitespace) and
+     * current pointer (where current token ends).
      * 
      * @param type
      * @param literal
