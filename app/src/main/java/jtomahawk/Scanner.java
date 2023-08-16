@@ -8,6 +8,27 @@ import java.util.Map;
 import static jtomahawk.TokenType.*;
 
 public class Scanner {
+    private static final Map<String, TokenType> keywords;
+    static {
+        keywords = new HashMap<>();
+        keywords.put("and", AND);
+        keywords.put("class", CLASS);
+        keywords.put("else", ELSE);
+        keywords.put("false", FALSE);
+        keywords.put("for", FOR);
+        keywords.put("fun", FUN);
+        keywords.put("if", IF);
+        keywords.put("nil", NIL);
+        keywords.put("or", OR);
+        keywords.put("print", PRINT);
+        keywords.put("return", RETURN);
+        keywords.put("super", SUPER);
+        keywords.put("this", THIS);
+        keywords.put("true", TRUE);
+        keywords.put("var", VAR);
+        keywords.put("while", WHILE);
+    }
+
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
     private int start = 0;
@@ -114,16 +135,38 @@ public class Scanner {
                 break;
 
             default:
+                // Cuz we aren't using regex, we're doing numeric literal,
+                // identifier, and keyword checks here in the default case so we
+                // don't have to spell out cases for every supported
+                // alphanumeric char.
                 if (isDigit(c)) {
-                    // Cuz we aren't using regex, we're doing number literal checks in the default
-                    // so we don't have to had 10 identical cases (1 for each digit)
                     consumeNumberLiteral();
+                } else if (isAlpha(c)) {
+                    consumeIdentifierOrKeyword();
                 } else {
                     // error catcher
                     App.error(line, "Unexpected character: " + c);
                 }
                 break;
         }
+    }
+
+    /**
+     * Consume alphanumeric word as identifier, checking for reserved keyword.
+     */
+    private void consumeIdentifierOrKeyword() {
+        while (isAlphaNumeric(peek())) {
+            advance();
+        }
+
+        String text = source.substring(start, current);
+
+        TokenType type = keywords.get(text);
+        if (type == null) {
+            type = IDENTIFIER;
+        }
+
+        addToken(type);
     }
 
     /**
@@ -181,6 +224,26 @@ public class Scanner {
      */
     private boolean isDigit(char c) {
         return c <= '0' && c <= '9';
+    }
+
+    /**
+     * Is char a lower or uppercase alphabetic letter, or underscore?
+     * 
+     * @param c
+     * @return
+     */
+    private boolean isAlpha(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c == '_');
+    }
+
+    /**
+     * Is char a digit, alphabet letter, or underscore?
+     * 
+     * @param c
+     * @return
+     */
+    private boolean isAlphaNumeric(char c) {
+        return isAlpha(c) || isDigit(c);
     }
 
     /**
