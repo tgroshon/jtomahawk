@@ -88,7 +88,7 @@ public class Scanner {
                 addToken(advanceOnMatch('=') ? GREATER_EQUAL : GREATER);
                 break;
 
-            // special cases
+            // distinguish between division and comment
             case '/':
                 // double slash means a comment
                 if (advanceOnMatch('/')) {
@@ -109,11 +109,36 @@ public class Scanner {
                 line++;
                 break;
 
+            case '"':
+                consumeStringLiteral();
+                break;
+
             // error catcher
             default:
                 App.error(line, "Unexpected character: " + c);
                 break;
         }
+    }
+
+    private void consumeStringLiteral() {
+        while (peek() != '"' && !isAtEnd()) {
+            // support multi-line strings :)
+            if (peek() == '\n') {
+                line++;
+            }
+            advance();
+        }
+
+        if (isAtEnd()) {
+            App.error(line, "Unterminated string.");
+            return;
+        }
+
+        advance(); // consume the closing " char.
+
+        // Trim the surrounding quotes
+        String value = source.substring(start + 1, current - 1);
+        addToken(STRING, value);
     }
 
     /**
