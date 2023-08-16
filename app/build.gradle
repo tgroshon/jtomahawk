@@ -29,6 +29,14 @@ application {
     mainClass = 'jtomahawk.App'
 }
 
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'jtomahawk.App'
+        )
+    }
+}
+
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
