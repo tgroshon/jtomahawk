@@ -15,8 +15,14 @@ def define_type(f, base_name, class_name, raw_fields):
     for field in fields:
         fname = field.split(" ")[1]
         print(f"      this.{fname} = {fname};", file=f)
-
     f.write("    }\n\n")
+
+    # implement visitor pattern delegation
+    print("    @Override", file=f)
+    print("    <R> R accept(Visitor<R> visitor) {", file=f)
+    print(f"      return visitor.visit{class_name + base_name}(this);", file=f)
+    print("    };", file=f)
+    print("", file=f)
 
     # field declarations
     for field in fields:
@@ -51,12 +57,16 @@ def define_ast(output_dir, base_name, grammar_types):
         print(" {", file=f)
 
         define_visitor(f, base_name, grammar_types)
+        
+        print("  abstract <R> R accept(Visitor<R> visitor);", file=f)
+        print("", file=f)
 
         for gt in grammar_types:
             parts = gt.split(":")
             class_name = parts[0].strip()
             fields = parts[1].strip()
             define_type(f, base_name, class_name, fields)
+
 
         print("}", file=f)
         print("", file=f)
