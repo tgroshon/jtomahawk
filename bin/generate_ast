@@ -4,6 +4,7 @@ import os
 import sys
 
 def define_type(f, base_name, class_name, raw_fields):
+    """ Define an Expression sub-class for each type in our grammar. """
     f.write(f"  static class {class_name} extends {base_name} ")
     f.write("{ \n")
     fields = raw_fields.split(", ")
@@ -23,6 +24,17 @@ def define_type(f, base_name, class_name, raw_fields):
 
     f.write("  }\n\n")
 
+def define_visitor(f, base_name, grammar_types):
+    """ Define a Visitor interface which will later implement parsing operations 
+        for each node type. """
+    f.write("  interface Visitor<R> { \n")
+
+    for gt in grammar_types:
+        class_name = gt.split(":")[0].strip()
+        print(f"    R visit{class_name + base_name}({class_name} {base_name.lower()});", file=f)
+
+    f.write("  }\n")
+
 
 
 def define_ast(output_dir, base_name, grammar_types):
@@ -35,6 +47,8 @@ def define_ast(output_dir, base_name, grammar_types):
 
         f.write(f"abstract class {base_name}")
         f.write(" {\n")
+
+        define_visitor(f, base_name, grammar_types)
 
         for gt in grammar_types:
             parts = gt.split(":")
