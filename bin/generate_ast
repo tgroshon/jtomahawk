@@ -10,7 +10,7 @@ def define_type(f, base_name, class_name, raw_fields):
     fields = raw_fields.split(", ")
 
     # constructor
-    f.write(f"    {class_name}({raw_fields})")
+    f.write(f"    {class_name}({raw_fields}) ")
     f.write("{ \n")
     for field in fields:
         fname = field.split(" ")[1]
@@ -27,26 +27,28 @@ def define_type(f, base_name, class_name, raw_fields):
 def define_visitor(f, base_name, grammar_types):
     """ Define a Visitor interface which will later implement parsing operations 
         for each node type. """
-    f.write("  interface Visitor<R> { \n")
+    print("  interface Visitor<R> {", file=f)
 
     for gt in grammar_types:
         class_name = gt.split(":")[0].strip()
         print(f"    R visit{class_name + base_name}({class_name} {base_name.lower()});", file=f)
 
-    f.write("  }\n")
-
+    print("  }", file=f)
+    print("", file=f)
 
 
 def define_ast(output_dir, base_name, grammar_types):
     base_path = os.path.join(output_dir, f"{base_name}.java")
     with open(base_path, "w") as f:
-        f.write("package jtomahawk.ast;\n\n")
+        print("package jtomahawk.ast;", file=f)
+        print("", file=f)
 
-        f.write("import java.util.List;\n")
-        f.write("import jtomahawk.Token;\n\n")
+        print("import java.util.List;", file=f)
+        print("import jtomahawk.Token;", file=f)
+        print("", file=f)
 
         f.write(f"abstract class {base_name}")
-        f.write(" {\n")
+        print(" {", file=f)
 
         define_visitor(f, base_name, grammar_types)
 
@@ -56,7 +58,8 @@ def define_ast(output_dir, base_name, grammar_types):
             fields = parts[1].strip()
             define_type(f, base_name, class_name, fields)
 
-        f.write("}\n\n")
+        print("}", file=f)
+        print("", file=f)
 
 def main(output_dir):
     print(output_dir)
